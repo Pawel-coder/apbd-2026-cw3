@@ -78,7 +78,7 @@ public class Program
     private static void ShowAllHardware()
     {
         Console.WriteLine("All Hardware: ");
-        foreach (var h in _rentalService.GetAvaibleHardware())
+        foreach (var h in _rentalService.GetAvailableHardware())
             Console.WriteLine($"{h.ID} | {h}");
     }
     private static void ShowAvailableHardware()
@@ -91,7 +91,7 @@ public class Program
     {
         Console.WriteLine("Borrowed Hardware");
         Console.WriteLine("User list:");
-        foreach (var u in _rentalService.GetAllUsers())
+        foreach (var u in _rentalService.GetUsers())
             Console.WriteLine($"({u.ID}) {u}");
             
         Console.Write("\nInput user ID: ");
@@ -157,21 +157,21 @@ public class Program
             Console.Write("Input user ID: ");
             if (!Guid.TryParse(Console.ReadLine(), out Guid userId)) return;
 
-            var rentals = _rentalService.GetActiveHardwareForUser(userId);
+            var rentals = _rentalService.GetActiveRentalsForUser(userId);
             foreach (var r in rentals)
-                Console.WriteLine($"Hardware: {r.RentedHardware.Name} Borrowed date: {h.BorrowDate:yyyy-MM-dd} Excpeted return date: {h.ExpectedReturnDate:yyyy-MM-dd}");
+                Console.WriteLine($"Hardware: {r.RentedHardware.Name} Borrowed date: {r.BorrowDate:yyyy-MM-dd} Excpeted return date: {r.ExpectedReturnDate:yyyy-MM-dd}");
         }
 
         private static void ShowOverdueRentals()
         {
             Console.WriteLine("Overdue rentals");
-            var rentals = _rentalService.GetOverdueLoans();
+            var rentals = _rentalService.GetOverdueRentals();
             foreach (var r in rentals)
-                Console.WriteLine($"User: {r.Borrower.LastName} Hardware: {r.RentedEquipment.Name} Expected return date: {r.ExpectedReturnDate:yyyy-MM-dd} Days over due date: {(DateTime.Now.Date - r.ExpectedReturnDate.Date).Days}");
+                Console.WriteLine($"User: {r.Borrower.Surname} Hardware: {r.RentedHardware.Name} Expected return date: {r.ExpectedReturnDate:yyyy-MM-dd} Days over due date: {(DateTime.Now.Date - r.ExpectedReturnDate.Date).Days}");
         }
 
         private static void ShowReport()
         {
-            Console.WriteLine(_rentalService.GenerateReport());
+            Console.WriteLine(_rentalService.GenerateShortReport());
         }
 }
