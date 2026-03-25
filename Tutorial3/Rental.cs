@@ -12,11 +12,11 @@ public class Rental
     public bool IsOngoing => ActualReturnDate == null;
     public bool IsOverdue => IsOngoing && DateTime.Now.Date > ExpectedReturnDate;
 
-    public Rental(User borrower, Hardware rentedHardware, DateTime borrowDate, DateTime expectedReturnDate)
+    public Rental(User borrower, Hardware rentedHardware, DateTime expectedReturnDate)
     {
         Borrower = borrower;
         RentedHardware = rentedHardware;
-        BorrowDate = borrowDate;
+        BorrowDate = DateTime.Now;
         ExpectedReturnDate = expectedReturnDate;
     }
 
