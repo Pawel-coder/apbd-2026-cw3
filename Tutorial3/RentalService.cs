@@ -35,4 +35,18 @@ public class RentalService
         _rentals.Add(rental);
         return rental;
     }
+
+    public Rental Return(Guid rentalId)
+    {
+        var rental = _rentals.FirstOrDefault(r=>r.ID == rentalId);
+        if (rental == null)
+        {
+            throw new RentalException("Rental not found");
+        }
+        if(!rental.IsOngoing)
+            throw new RentalException("Rental has been returend");
+        rental.ReturnHardware(DateTime.Now);
+        rental.RentedHardware.Status = HardwareStatus.Available;
+        return rental;
+    }
 }
