@@ -6,7 +6,7 @@ public abstract class User
     public string Name { get; set; }
     public string Surname { get; set; }
     public abstract string UserType { get; }
-    public abstract int ActiveLoansLimit { get; }
+    public abstract int ActiveRentalLimit { get; }
     public User(string name, string surname)
     {
         Name = name;
