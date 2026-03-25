@@ -18,6 +18,8 @@ public class Program
             Console.WriteLine("6. Show active rentals for a user");
             Console.WriteLine("7. Show overdue rentals");
             Console.WriteLine("8. Show short report for rental service");
+            Console.WriteLine("9. Add new user");
+            Console.WriteLine("10. Add new hardware");
             Console.WriteLine("0. End program");
             Console.Write("\nPick your poison: ");
             
@@ -50,6 +52,12 @@ public class Program
                         break;
                     case "8":
                         ShowReport();
+                        break;
+                    case "9":
+                        AddNewUser();
+                        break;
+                    case "10":
+                        AddNewHardware();
                         break;
                     case "0":
                         endProgram = true;
@@ -173,5 +181,97 @@ public class Program
         private static void ShowReport()
         {
             Console.WriteLine(_rentalService.GenerateShortReport());
+        }
+        private static void AddNewUser()
+        {
+            Console.WriteLine("Adding new user");
+            Console.WriteLine("1. Student");
+            Console.WriteLine("2. Employee");
+            Console.Write("Pick type of user (1 or 2):");
+            var typeChoice = Console.ReadLine();
+
+            Console.Write("Name: ");
+            var name = Console.ReadLine();
+            Console.Write("Surname: ");
+            var surname = Console.ReadLine();
+
+            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(surname))
+            {
+                Console.WriteLine("Error - name or surname can't be empty");
+                return;
+            }
+
+            User newUser;
+            if (typeChoice == "1")
+            {
+                newUser = new Student(name, surname);
+            }
+            else if (typeChoice == "2")
+            {
+                newUser = new Employee(name, surname);
+            }
+            else
+            {
+                Console.WriteLine("Error - wrong user type");
+                return;
+            }
+
+            _rentalService.RegisterUser(newUser);
+            Console.WriteLine($"New user has been registered (ID: {newUser.ID}) {newUser.Name} {newUser.Surname}");
+        }
+
+        private static void AddNewHardware()
+        {
+            Console.WriteLine("Adding new hardware");
+            Console.WriteLine("1. Laptop");
+            Console.WriteLine("2. Projector");
+            Console.WriteLine("3. Camera");
+            Console.Write("Pick type of hardware (1, 2 or 3): ");
+            var typeChoice = Console.ReadLine();
+
+            Console.Write("Hardware name: ");
+            var name = Console.ReadLine();
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                Console.WriteLine("Error - name can't be empty");
+                return;
+            }
+
+            Hardware newHardware = null;
+
+            switch (typeChoice)
+            {
+                case "1":
+                    Console.Write("How much RAM (GB)?: ");
+                    if (!int.TryParse(Console.ReadLine(), out int ram)) { Console.WriteLine("Error: RAM ought to be number"); return; }
+                    Console.Write("Input processor: ");
+                    var processor = Console.ReadLine();
+                    newHardware = new Laptop(name, 15.0m,processor, ram);
+                    break;
+
+                case "2":
+                    Console.Write("Input brightness in lumen: ");
+                    if (!int.TryParse(Console.ReadLine(), out int lumens)) { Console.WriteLine("Error - brithness ought to be number"); return; }
+                    Console.Write("Input resolution: ");
+                    var resolution = Console.ReadLine();
+                    newHardware = new Projector(name, 5m, lumens, resolution);
+                    break;
+
+                case "3": 
+                    Console.Write("How much zoom does camera have?: ");
+                    if (!float.TryParse(Console.ReadLine(), out float zoom)) { Console.WriteLine("Error: zoom ought to be number"); return; }
+                    Console.Write("How many Megapixels does sensor have?: ");
+                    if (!float.TryParse(Console.ReadLine(), out float megapixels)) { Console.WriteLine("Error: megapixels ought to be number"); return; }
+                    newHardware = new Camera(name, 10.0m, megapixels, zoom);
+                    break;
+
+                default:
+                    Console.WriteLine("Error - wrong hardware type");
+                    return;
+            }
+
+            _rentalService.RegisterHardware(newHardware);
+            Console.WriteLine($"New hardware{newHardware.Name} (ID: {newHardware.ID}) has been added");
         }
 }
