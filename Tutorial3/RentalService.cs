@@ -1,3 +1,6 @@
+using System.Collections;
+using System.Text;
+
 namespace Tutorial3;
 
 public class RentalService
@@ -60,5 +63,20 @@ public class RentalService
         if(hardware.Status == HardwareStatus.Borrowed && newStatus != HardwareStatus.Borrowed)
             throw new RentalException("Can't change hardware status when it is borrowed");
         hardware.Status = newStatus;
+    }
+    public IEnumerable<Rental> GetActiveRentalsForUser(Guid userId) => _rentals.Where(r => r.Borrower.ID == userId&& r.IsOngoing);
+    public IEnumerable<Rental> GetOverdueRentals()=> _rentals.Where(r => r.IsOverdue);
+
+    public string GenerateShortReport()
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("Rental service report:");
+        sb.AppendLine($"Registered users: {_users.Count} Registered hardware: {_hardware.Count}");
+        sb.AppendLine($"Available: {_hardware.Count(h => h.Status == HardwareStatus.Available)} " +
+                      $"Borrowed: {_hardware.Count(h => h.Status == HardwareStatus.Borrowed)} " +
+                      $"(overdue: {GetOverdueRentals().Count()}, active: {_rentals.Count(r => r.IsOngoing)}) " +
+                      $"Unavaible: {_hardware.Count(h => h.Status == HardwareStatus.Unavailable)}");
+        sb.AppendLine($"Sum of penalty fees: {_rentals.Sum(r => r.Penalty):C}");
+        return sb.ToString();
     }
 }
