@@ -15,6 +15,6 @@ public abstract class Hardware
     public abstract string GetShortDescription();
     public override string ToString()
     {
-        return "[{ID}] {Name} (STATUS: {Status}) - {GetShortDescription()}";
+        return $"[{ID}] {Name} (STATUS: {Status}) - {GetShortDescription()}";
     }
 }
