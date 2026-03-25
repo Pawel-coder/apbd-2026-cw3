@@ -49,4 +49,16 @@ public class RentalService
         rental.RentedHardware.Status = HardwareStatus.Available;
         return rental;
     }
+
+    public void ChangeHardwareStatus(Guid hardwareId, HardwareStatus newStatus)
+    {
+        var hardware = _hardware.FirstOrDefault(h => h.ID == hardwareId);
+        if (hardware == null)
+        {
+            throw new RentalException("Hardware not found");
+        }
+        if(hardware.Status == HardwareStatus.Borrowed && newStatus != HardwareStatus.Borrowed)
+            throw new RentalException("Can't change hardware status when it is borrowed");
+        hardware.Status = newStatus;
+    }
 }
