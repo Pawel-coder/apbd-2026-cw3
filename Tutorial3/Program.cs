@@ -84,15 +84,15 @@ public class Program
     private static void ShowAvailableHardware()
     {
         Console.WriteLine("Avaible Hardware: ");
-        foreach (var eq in _rentalService.GetAvailableHardware())
-            Console.WriteLine($"{h.Id} | {h}");
+        foreach (var h in _rentalService.GetAvailableHardware())
+            Console.WriteLine($"{h.ID} | {h}");
     }
     private static void BorrowHardwareMenu()
     {
         Console.WriteLine("Borrowed Hardware");
         Console.WriteLine("User list:");
         foreach (var u in _rentalService.GetAllUsers())
-            Console.WriteLine($"{u.Id} | {u}");
+            Console.WriteLine($"({u.ID}) {u}");
             
         Console.Write("\nInput user ID: ");
         if (!Guid.TryParse(Console.ReadLine(), out Guid userId)) return;
@@ -107,7 +107,71 @@ public class Program
         Console.Write("For how many days do you rent? ");
         if (!int.TryParse(Console.ReadLine(), out int days)) return;
 
-        var rental = _rentalService.BorrowHardware(userId, hId, days);
+        var rental = _rentalService.BorrowHardware(userId, hID, days);
         Console.WriteLine($"\nHardware has been rented. Expected return date: {rental.ExpectedReturnDate:yyyy-MM-dd}");
     }
+    private static void ReturnHardwareMenu()
+        {
+            Console.WriteLine("Return Hardware");
+            Console.Write("Input user ID: ");
+            if (!Guid.TryParse(Console.ReadLine(), out Guid userId)) return;
+
+            var rentals = _rentalService.GetActiveRentalsForUser(userId).ToList();
+            if (!rentals.Any())
+            {
+                Console.WriteLine("No active rentals this user has");
+                return;
+            }
+
+            foreach (var r in rentals)
+                Console.WriteLine($"Rental ID: {r.ID} Name: {r.RentedHardware.Name} Expected Date: {r.ExpectedReturnDate:yyyy-MM-dd}");
+
+            Console.Write("\nInput hardware ID to return: ");
+            if (!Guid.TryParse(Console.ReadLine(), out Guid rentalId)) return;
+
+            var returnedRental = _rentalService.Return(rentalId);
+            Console.WriteLine($"\nHardware returned");
+            if (returnedRental.Penalty > 0)
+                Console.WriteLine($"\nBEWARE: Penalty fee has been issued! : {returnedRental.Penalty:C}");
+        }
+
+        private static void ChangeHardwareStatusMenu()
+        {
+            Console.WriteLine("Changing hardware status");
+            ShowAllHardware();
+            Console.Write("\nInput hardware ID to change status: ");
+            if (!Guid.TryParse(Console.ReadLine(), out Guid hId)) return;
+
+            Console.WriteLine("1. Avaible\n2. Unavaible");
+            Console.Write("Pick status: ");
+            var choice = Console.ReadLine();
+            
+            var status = choice == "2" ? HardwareStatus.Unavailable : HardwareStatus.Available;
+            _rentalService.ChangeHardwareStatus(hId, status);
+            Console.WriteLine("Status changed");
+        }
+
+        private static void ShowUserActiveRentalsMenu()
+        {
+            Console.WriteLine("Active rentals for user");
+            Console.Write("Input user ID: ");
+            if (!Guid.TryParse(Console.ReadLine(), out Guid userId)) return;
+
+            var rentals = _rentalService.GetActiveHardwareForUser(userId);
+            foreach (var r in rentals)
+                Console.WriteLine($"Hardware: {r.RentedHardware.Name} Borrowed date: {h.BorrowDate:yyyy-MM-dd} Excpeted return date: {h.ExpectedReturnDate:yyyy-MM-dd}");
+        }
+
+        private static void ShowOverdueRentals()
+        {
+            Console.WriteLine("Overdue rentals");
+            var rentals = _rentalService.GetOverdueLoans();
+            foreach (var r in rentals)
+                Console.WriteLine($"User: {r.Borrower.LastName} Hardware: {r.RentedEquipment.Name} Expected return date: {r.ExpectedReturnDate:yyyy-MM-dd} Days over due date: {(DateTime.Now.Date - r.ExpectedReturnDate.Date).Days}");
+        }
+
+        private static void ShowReport()
+        {
+            Console.WriteLine(_rentalService.GenerateReport());
+        }
 }
