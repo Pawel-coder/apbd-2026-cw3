@@ -20,6 +20,7 @@ public class Program
             Console.WriteLine("8. Show short report for rental service");
             Console.WriteLine("9. Add new user");
             Console.WriteLine("10. Add new hardware");
+            Console.WriteLine("11. Run Demo Scenario");
             Console.WriteLine("0. End program");
             Console.Write("\nPick your poison: ");
             
@@ -58,6 +59,9 @@ public class Program
                         break;
                     case "10":
                         AddNewHardware();
+                        break;
+                    case "11":
+                        DemoScenario();
                         break;
                     case "0":
                         endProgram = true;
@@ -273,5 +277,58 @@ public class Program
 
             _rentalService.RegisterHardware(newHardware);
             Console.WriteLine($"New hardware{newHardware.Name} (ID: {newHardware.ID}) has been added");
+        }
+
+        private static void DemoScenario()
+        {
+            Console.WriteLine("Demo Scenario");
+            
+            Console.WriteLine("Adding couple of different hardware...");
+            var laptop1 = new Laptop("Lenovo X 13", 15m, "Amd x168", 64);
+            var laptop2 = new Laptop("Dell Super", 15m, "Intel x7", 8);
+            var projector = new Projector("Sony 16K", 5m, 9000, "FHD");
+            var camera = new Camera("Panasonic Mini", 10m, 16, 8);
+            _rentalService.RegisterHardware(laptop1);
+            _rentalService.RegisterHardware(laptop2);
+            _rentalService.RegisterHardware(projector);
+            _rentalService.RegisterHardware(camera);
+            
+            Console.WriteLine("Adding couple of different users...");
+            var student = new Student("Ada", "Pada");
+            var employee = new Employee("Zao", "Zing");
+            _rentalService.RegisterUser(student);
+            _rentalService.RegisterUser(employee);
+            
+            Console.WriteLine("Renting hardware...");
+            var rental = _rentalService.BorrowHardware(student.ID, laptop1.ID, 7);
+            Console.WriteLine($"Student {student.Name} {student.Surname} has borrowed {laptop1.Name}. Expected return date: {rental.ExpectedReturnDate:yyyy-MM-dd}\n");
+            
+            var rental2=_rentalService.BorrowHardware(student.ID, projector.ID, 3);
+            Console.WriteLine($"Student {student.Name} {student.Surname} has borrowed {projector.Name}. Expected return date: {rental2.ExpectedReturnDate:yyyy-MM-dd}\n");
+            Console.WriteLine("Incorrect operation: user tries borrowing hardware when he has exceeded his limit: ");
+            try
+            {
+                _rentalService.BorrowHardware(student.ID, camera.ID, 2);
+            }
+            catch (RentalException ex)
+            {
+                Console.WriteLine("Error caught: "+ex.Message);
+            }
+            Console.WriteLine();
+            
+            Console.WriteLine("Returning hardware in time");
+            var returnedRental = _rentalService.Return(rental.ID);
+            Console.WriteLine($"Returned {laptop1.Name} in time. Penalty fee: {returnedRental.Penalty:C}\n");
+            
+            Console.WriteLine("Overdue rental: ");
+            var rental3 = _rentalService.BorrowHardware(employee.ID, laptop2.ID, -5);//Cheating date
+            Console.WriteLine($"Employee {employee.Surname} rented {laptop2.Name}. Expected return date was: {rental3.ExpectedReturnDate:yyyy-MM-dd}");
+
+            var returnedLateRental = _rentalService.Return(rental3.ID);
+            Console.WriteLine($"Returned overdue hardware! Penalty rate per day {laptop2.PenaltyRatePerDay:C}: for 5 days it sums up to {returnedLateRental.Penalty:C}");
+            Console.WriteLine();
+            
+            Console.WriteLine("Generating system report");
+            Console.WriteLine(_rentalService.GenerateShortReport());
         }
 }
